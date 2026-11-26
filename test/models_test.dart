@@ -47,12 +47,14 @@ void main() {
       'descripcion': 'Filtro de aceite',
       'existencia': 0,
       'ubicacion': 'P1-A3',
+      'imagen_url': '/v1/imagenes/w712-75-mann.jpg',
       'grupo': {'id': 1, 'descripcion': 'Filtro de aceite 1.6L', 'existencia_total': 17},
       'equivalentes': [
         {'id': 14, 'numero_parte': 'F 026 407 157', 'marca': 'Bosch', 'descripcion': 'Filtro de aceite', 'existencia': 12, 'ubicacion': 'P1-A4'},
         {'id': 1, 'numero_parte': 'PH 5796', 'marca': 'Fram', 'descripcion': 'Filtro de aceite', 'existencia': 5, 'ubicacion': 'P2-B1'},
       ],
     });
+    expect(d.imagenUrl, '/v1/imagenes/w712-75-mann.jpg');
     expect(d.grupo!.existenciaTotal, 17);
     expect(d.equivalentes.map((e) => e.marca), ['Bosch', 'Fram']);
 
@@ -68,6 +70,7 @@ void main() {
       'grupo': null,
       'equivalentes': <Object>[],
     });
+    expect(sinGrupo.imagenUrl, isNull);
     expect(sinGrupo.grupo, isNull);
     expect(sinGrupo.equivalentes, isEmpty);
   });

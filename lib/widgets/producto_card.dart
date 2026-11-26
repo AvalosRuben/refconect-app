@@ -15,52 +15,66 @@ class ProductoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final p = producto;
     final tema = Theme.of(context).textTheme;
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: alTocar,
-        child: Padding(
-          padding: const EdgeInsets.all(Medidas.margen),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
+    return TarjetaRC(
+      alTocar: alTocar,
+      padding: EdgeInsets.zero,
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Refuerzo visual del estado; el texto de la pastilla es la señal principal.
+            ExcludeSemantics(child: Container(width: 5, color: ExistenciaChip.colorDe(p.existencia))),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(14, 14, 12, 14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(p.numeroParte,
-                            style: tema.titleLarge?.copyWith(color: AppColores.primario, letterSpacing: 0.3)),
-                        const SizedBox(height: 2),
-                        Text('${p.marca} · ${p.categoria}',
-                            style: tema.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
-                        Text(p.descripcion, style: tema.bodyMedium?.copyWith(color: AppColores.textoSecundario)),
+                        Expanded(child: Text(p.numeroParte, style: Fuentes.numeroParte())),
+                        const SizedBox(width: 8),
+                        ExistenciaChip(existencia: p.existencia),
                       ],
                     ),
-                  ),
-                  const Icon(Icons.chevron_right, color: AppColores.textoSecundario, semanticLabel: 'Ver detalle'),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  ExistenciaChip(existencia: p.existencia),
-                  if (p.ubicacion != null) Etiqueta(icono: Icons.place_outlined, texto: p.ubicacion!),
-                  if (p.existencia == 0 && p.tieneEquivalentes)
-                    const Etiqueta(
-                      icono: Icons.swap_horiz,
-                      texto: 'Tiene equivalentes',
-                      color: AppColores.acentoOscuro,
-                      fondo: AppColores.acentoTenue,
+                    const SizedBox(height: 6),
+                    Text('${p.marca} · ${p.categoria}',
+                        style: tema.bodyMedium?.copyWith(fontWeight: FontWeight.w700, color: AppColores.primario)),
+                    const SizedBox(height: 2),
+                    Text(p.descripcion,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: tema.bodyMedium?.copyWith(color: AppColores.textoSecundario)),
+                    const SizedBox(height: 12),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Expanded(
+                          child: Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              if (p.ubicacion != null) Etiqueta(icono: Icons.place_outlined, texto: p.ubicacion!),
+                              if (p.existencia == 0 && p.tieneEquivalentes)
+                                const Etiqueta(
+                                  icono: Icons.swap_horiz,
+                                  texto: 'Tiene equivalentes',
+                                  color: AppColores.acentoOscuro,
+                                  fondo: AppColores.acentoTenue,
+                                ),
+                            ],
+                          ),
+                        ),
+                        const Icon(Icons.arrow_forward, size: 22, color: AppColores.textoSecundario,
+                            semanticLabel: 'Ver detalle'),
+                      ],
                     ),
-                ],
+                  ],
+                ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

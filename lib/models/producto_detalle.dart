@@ -48,6 +48,7 @@ class ProductoDetalle {
     required this.descripcion,
     required this.existencia,
     required this.ubicacion,
+    this.imagenUrl,
     required this.grupo,
     required this.equivalentes,
   });
@@ -60,6 +61,7 @@ class ProductoDetalle {
         descripcion: json['descripcion'] as String,
         existencia: json['existencia'] as int,
         ubicacion: json['ubicacion'] as String?,
+        imagenUrl: json['imagen_url'] as String?,
         grupo: json['grupo'] == null ? null : GrupoEquivalencia.fromJson(json['grupo'] as Map<String, dynamic>),
         // La API ya los entrega por existencia descendente.
         equivalentes: (json['equivalentes'] as List)
@@ -74,6 +76,8 @@ class ProductoDetalle {
   final String descripcion;
   final int existencia;
   final String? ubicacion;
+  /// Ruta de la foto en la API (ej. /v1/imagenes/w712-75-mann.jpg); null si no tiene.
+  final String? imagenUrl;
   final GrupoEquivalencia? grupo;
   final List<Equivalente> equivalentes;
 }

@@ -9,7 +9,7 @@ class Etiqueta extends StatelessWidget {
     required this.icono,
     required this.texto,
     this.color = AppColores.textoSecundario,
-    this.fondo = const Color(0xFFEDF1F5),
+    this.fondo = AppColores.superficieHundida,
   });
 
   final IconData icono;
@@ -27,7 +27,9 @@ class Etiqueta extends StatelessWidget {
         children: [
           Icon(icono, size: 18, color: color),
           const SizedBox(width: 6),
-          Text(texto, style: TextStyle(color: color, fontSize: 16, fontWeight: FontWeight.w600)),
+          Flexible(
+            child: Text(texto, style: TextStyle(color: color, fontSize: 16, fontWeight: FontWeight.w600)),
+          ),
         ],
       ),
     );

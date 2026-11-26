@@ -31,6 +31,12 @@ class ApiClient {
   Future<Map<String, dynamic>> post(String ruta, Map<String, Object?> cuerpo) =>
       _enviar(() => _http.post(_uri(ruta, null), headers: _encabezados(), body: jsonEncode(cuerpo)));
 
+  /// URL completa de un recurso cuya ruta ya trae /v1 (ej. imagen_url).
+  Uri recurso(String rutaAbsoluta) => Uri.parse('$urlBase$rutaAbsoluta');
+
+  /// Encabezados para descargar archivos protegidos (imágenes).
+  Map<String, String> get encabezadosArchivo => {if (token != null) 'Authorization': 'Bearer $token'};
+
   Uri _uri(String ruta, Map<String, String>? query) {
     final uri = Uri.parse('$urlBase/v1$ruta');
     return query == null || query.isEmpty ? uri : uri.replace(queryParameters: query);

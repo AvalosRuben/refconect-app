@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../core/theme/app_theme.dart';
 import '../widgets/logo.dart';
 
 class SplashScreen extends StatelessWidget {
@@ -13,8 +14,16 @@ class SplashScreen extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Logo(),
-            SizedBox(height: 32),
-            CircularProgressIndicator(semanticsLabel: 'Verificando sesión'),
+            SizedBox(height: 40),
+            SizedBox(
+              width: 28,
+              height: 28,
+              child: CircularProgressIndicator(
+                strokeWidth: 3,
+                color: AppColores.primario,
+                semanticsLabel: 'Verificando sesión',
+              ),
+            ),
           ],
         ),
       ),

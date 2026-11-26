@@ -7,7 +7,8 @@ import '../core/api/catalogo_repositorio.dart';
 import '../models/categoria.dart';
 import '../models/producto_resumen.dart';
 
-enum EstadoBusqueda { cargando, listo, vacio, error }
+/// [inicio]: sin filtro ni texto; se muestran los bloques de categorías y no se piden productos.
+enum EstadoBusqueda { inicio, cargando, listo, vacio, error }
 
 class BusquedaProvider extends ChangeNotifier {
   BusquedaProvider(this._repositorio, {this.espera = const Duration(milliseconds: 400)});
@@ -46,8 +47,20 @@ class BusquedaProvider extends ChangeNotifier {
   String? get error => _error;
   bool get sinConexion => _sinConexion;
 
+  /// Sin categoría ni texto: pantalla de bloques.
+  bool get enInicio => _q.isEmpty && _categoriaId == null;
+
+  /// Nombre de la categoría elegida, si hay.
+  String? get categoriaNombre {
+    for (final c in _categorias) {
+      if (c.id == _categoriaId) return c.nombre;
+    }
+    return null;
+  }
+
+  /// Por rendimiento, al entrar solo se cargan las categorías (no productos).
   Future<void> iniciar() async {
-    await Future.wait([_cargarCategorias(), _buscar()]);
+    if (await _cargarCategorias()) await _buscar();
   }
 
   void cambiarTexto(String texto) {
@@ -59,14 +72,28 @@ class BusquedaProvider extends ChangeNotifier {
     });
   }
 
-  void seleccionarCategoria(int? id) {
+  Future<void> seleccionarCategoria(int? id) async {
     if (id == _categoriaId) return;
     _categoriaId = id;
-    _buscar();
+    await _buscar();
+  }
+
+  /// Quita filtro y texto y regresa a los bloques.
+  Future<void> volverAlInicio() async {
+    _temporizador?.cancel();
+    if (enInicio) return;
+    _q = '';
+    _categoriaId = null;
+    await _buscar();
   }
 
   Future<void> reintentar() async {
-    await Future.wait([if (_categorias.isEmpty) _cargarCategorias(), _buscar()]);
+    if (_categorias.isEmpty) {
+      _estado = EstadoBusqueda.cargando;
+      _notificar();
+      if (!await _cargarCategorias()) return;
+    }
+    await _buscar();
   }
 
   /// Scroll infinito: pide la siguiente página si la hay.
@@ -95,9 +122,16 @@ class BusquedaProvider extends ChangeNotifier {
 
   Future<void> _buscar() async {
     final consulta = ++_consulta;
-    _estado = EstadoBusqueda.cargando;
     _cargandoMas = false;
     _resultados.clear();
+    if (enInicio) {
+      _hayMas = false;
+      _total = 0;
+      _estado = EstadoBusqueda.inicio;
+      _notificar();
+      return;
+    }
+    _estado = EstadoBusqueda.cargando;
     _notificar();
     try {
       final r = await _repositorio.buscar(q: _q, categoriaId: _categoriaId, limite: _limite);
@@ -114,12 +148,19 @@ class BusquedaProvider extends ChangeNotifier {
     _notificar();
   }
 
-  Future<void> _cargarCategorias() async {
+  /// Devuelve false si falló. En la pantalla de bloques el error se muestra; con una búsqueda activa,
+  /// el error de conexión ya lo muestra la propia búsqueda.
+  Future<bool> _cargarCategorias() async {
     try {
       _categorias = await _repositorio.categorias();
       _notificar();
-    } on ApiException {
-      // El error de conexión ya lo muestra la búsqueda; las categorías se reintentan con "Reintentar".
+      return true;
+    } on ApiException catch (e) {
+      if (enInicio) {
+        _ponerError(e);
+        _notificar();
+      }
+      return false;
     }
   }
 

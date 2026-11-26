@@ -18,21 +18,25 @@ class ExistenciaChip extends StatelessWidget {
         _ => '$existencia en existencia',
       };
 
+  /// Color del estado (para refuerzos visuales como la barra lateral de la tarjeta).
+  static Color colorDe(int existencia) => switch (existencia) {
+        0 => AppColores.error,
+        <= pocaMaxima => AppColores.advertencia,
+        _ => AppColores.exito,
+      };
+
   @override
   Widget build(BuildContext context) {
     final (color, fondo, icono) = switch (existencia) {
-      0 => (AppColores.error, AppColores.errorTenue, Icons.block),
-      <= pocaMaxima => (AppColores.advertencia, AppColores.advertenciaTenue, Icons.warning_amber_rounded),
-      _ => (AppColores.exito, AppColores.exitoTenue, Icons.check_circle),
+      0 => (AppColores.error, AppColores.errorTenue, Icons.remove_circle_outline),
+      <= pocaMaxima => (AppColores.advertencia, AppColores.advertenciaTenue, Icons.error_outline),
+      _ => (AppColores.exito, AppColores.exitoTenue, Icons.check_circle_outline),
     };
     final tamano = grande ? 18.0 : 16.0;
-    return Container(
+    return AnimatedContainer(
+      duration: Movimiento.de(context, Movimiento.corto),
       padding: EdgeInsets.symmetric(horizontal: grande ? 14 : 10, vertical: grande ? 8 : 6),
-      decoration: BoxDecoration(
-        color: fondo,
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: color.withValues(alpha: 0.4)),
-      ),
+      decoration: BoxDecoration(color: fondo, borderRadius: BorderRadius.circular(999)),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [

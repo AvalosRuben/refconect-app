@@ -24,5 +24,9 @@ class CatalogoRepositorio {
     return Paginado.fromJson(json, ProductoResumen.fromJson);
   }
 
+  /// URL y encabezados para mostrar la foto de una pieza.
+  String urlImagen(String ruta) => _api.recurso(ruta).toString();
+  Map<String, String> get encabezadosImagen => _api.encabezadosArchivo;
+
   Future<ProductoDetalle> detalle(int id) async => ProductoDetalle.fromJson(await _api.get('/productos/$id'));
 }

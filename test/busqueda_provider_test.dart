@@ -46,7 +46,7 @@ void main() {
     var caida = true;
     final cliente = MockClient((req) async {
       if (caida) throw http.ClientException('Connection refused', req.url);
-      if (req.url.path == '/v1/categorias') return json({'datos': []});
+      if (req.url.path == '/v1/categorias') return json({'datos': [{'id': 1, 'nombre': 'Filtros'}]});
       return json({'datos': [producto(1, 'A')], 'pagina': 1, 'limite': 20, 'total': 1});
     });
     final b = BusquedaProvider(CatalogoRepositorio(ApiClient(urlBase: 'http://prueba', cliente: cliente)));
@@ -57,8 +57,36 @@ void main() {
 
     caida = false;
     await b.reintentar();
+    expect(b.estado, EstadoBusqueda.inicio);
+    expect(b.categorias, hasLength(1));
+
+    await b.seleccionarCategoria(1);
     expect(b.estado, EstadoBusqueda.listo);
     expect(b.resultados, hasLength(1));
+  });
+
+  test('al iniciar solo pide categorías y muestra los bloques', () async {
+    final rutas = <String>[];
+    final cliente = MockClient((req) async {
+      rutas.add(req.url.path);
+      if (req.url.path == '/v1/categorias') return json({'datos': [{'id': 1, 'nombre': 'Frenos'}]});
+      return json({'datos': [producto(1, 'A')], 'pagina': 1, 'limite': 20, 'total': 1});
+    });
+    final b = BusquedaProvider(CatalogoRepositorio(ApiClient(urlBase: 'http://prueba', cliente: cliente)));
+    await b.iniciar();
+    expect(rutas, ['/v1/categorias']);
+    expect(b.estado, EstadoBusqueda.inicio);
+    expect(b.enInicio, isTrue);
+
+    await b.seleccionarCategoria(1);
+    expect(b.categoriaNombre, 'Frenos');
+    expect(b.resultados, hasLength(1));
+    expect(rutas.last, '/v1/productos');
+
+    await b.volverAlInicio();
+    expect(b.estado, EstadoBusqueda.inicio);
+    expect(b.resultados, isEmpty);
+    expect(b.categoriaId, isNull);
   });
 
   test('scroll infinito agrega la siguiente página', () async {
@@ -74,6 +102,7 @@ void main() {
     });
     final b = BusquedaProvider(CatalogoRepositorio(ApiClient(urlBase: 'http://prueba', cliente: cliente)));
     await b.iniciar();
+    await b.seleccionarCategoria(1);
     expect(b.hayMas, isTrue);
     await b.cargarMas();
     expect(b.resultados, hasLength(25));
